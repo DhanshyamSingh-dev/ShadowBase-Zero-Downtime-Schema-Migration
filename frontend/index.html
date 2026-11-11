@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowBase | Database Migration Sandbox</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <aside class="sidebar">
+        <h2>ShadowBase</h2>
+
+        <nav>
+            <a href="#" class="active" data-page="dashboard">Dashboard</a>
+            <a href="#" data-page="connection">Database Connection</a>
+            <a href="#" data-page="schema">Schema Reader</a>
+            <a href="#" data-page="comparison">Schema Comparison</a>
+            <a href="#" data-page="planner">Migration Planner</a>
+            <a href="#" data-page="history">Migration History</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+
+        <!-- Dashboard Page -->
+        <section id="dashboard" class="page">
+            <header>
+                <h1>Dashboard</h1>
+                <p>Zero-Downtime Schema Migration Sandbox</p>
+            </header>
+
+            <div class="welcome">
+                <h2>Welcome to ShadowBase!</h2>
+                <p>Manage, compare and test your database migrations safely.</p>
+            </div>
+
+            <div class="cards">
+                <div class="card">
+                    <h3>Database Status</h3>
+                    <p id="databaseStatus">Not Connected</p>
+                </div>
+
+                <div class="card">
+                    <h3>Total Tables</h3>
+                    <p>0</p>
+                </div>
+
+                <div class="card">
+                    <h3>Migrations</h3>
+                    <p>0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Database Connection Page -->
+        <section id="connection" class="page hidden">
+            <header>
+                <h1>Database Connection</h1>
+                <p>Connect your MySQL test database to ShadowBase.</p>
+            </header>
+
+            <div class="form-container">
+                <h2>MySQL Configuration</h2>
+
+                <form id="connectionForm">
+
+                    <label for="host">Database Host</label>
+                    <input type="text" id="host"
+                           placeholder="localhost" value="localhost" required>
+
+                    <label for="port">Port</label>
+                    <input type="number" id="port"
+                           placeholder="3306" value="3306" required>
+
+                    <label for="database">Database Name</label>
+                    <input type="text" id="database"
+                           placeholder="Enter database name" required>
+
+                    <label for="username">Username</label>
+                    <input type="text" id="username"
+                           placeholder="Enter MySQL username" required>
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password"
+                           placeholder="Enter MySQL password" required>
+
+                    <button type="submit">Test Connection</button>
+
+                </form>
+
+                <p id="connectionMessage"></p>
+            </div>
+        </section>
+
+        <!-- Placeholder Pages -->
+        <section id="schema" class="page hidden">
+            <h1>Schema Reader</h1>
+            <p>Database tables and columns will appear here.</p>
+        </section>
+
+        <section id="comparison" class="page hidden">
+            <h1>Schema Comparison</h1>
+            <p>Compare database schemas here.</p>
+        </section>
+
+        <section id="planner" class="page hidden">
+            <h1>Migration Planner</h1>
+            <p>Migration plans will appear here.</p>
+        </section>
+
+        <section id="history" class="page hidden">
+            <h1>Migration History</h1>
+            <p>Previous migration records will appear here.</p>
+        </section>
+
+    </main> 
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
