@@ -1,0 +1,13 @@
+package com.shadowbase.shadowbase;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ShadowbaseApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ShadowbaseApplication.class, args);
+	}
+
+}
