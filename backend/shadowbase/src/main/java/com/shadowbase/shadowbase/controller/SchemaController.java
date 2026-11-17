@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.shadowbase.shadowbase.schema.SchemaDefinition;
+import com.shadowbase.shadowbase.schema.TableInfo;
 import com.shadowbase.shadowbase.service.SchemaReaderService;
 import com.shadowbase.shadowbase.service.SchemaComparisonService;
 import com.shadowbase.shadowbase.service.MigrationPlanService;
@@ -38,23 +39,29 @@ public class SchemaController {
         this.validationService = validationService;
     }
 
+    // Get tables with column details
     @GetMapping("/api/schema/tables")
-    public List<String> getTables() {
+    public List<TableInfo> getTables() {
+
         try {
-            return schemaReaderService.getTableNames();
+            return schemaReaderService.getTables();
+
         } catch (Exception e) {
+
             throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Unable to read database schema."
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Unable to read database schema."
             );
         }
     }
 
+    // Compare current schema with target schema
     @PostMapping("/api/schema/compare")
     public Map<String, Object> compareSchema(
             @RequestBody SchemaDefinition schema) {
 
         try {
+
             List<String> currentTables =
                     schemaReaderService.getTableNames();
 
@@ -81,9 +88,10 @@ public class SchemaController {
             return response;
 
         } catch (Exception e) {
+
             throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Schema comparison failed."
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Schema comparison failed."
             );
         }
     }

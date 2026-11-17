@@ -11,6 +11,9 @@ import javax.sql.DataSource;
 
 import org.springframework.stereotype.Service;
 
+import com.shadowbase.shadowbase.schema.ColumnInfo;
+import com.shadowbase.shadowbase.schema.TableInfo;
+
 @Service
 public class SchemaReaderService {
 
@@ -20,6 +23,7 @@ public class SchemaReaderService {
         this.dataSource = dataSource;
     }
 
+    // Existing method: retrieves table names
     public List<String> getTableNames() throws Exception {
 
         List<String> tables = new ArrayList<>();
@@ -36,6 +40,63 @@ public class SchemaReaderService {
 
                 while (resultSet.next()) {
                     tables.add(resultSet.getString("TABLE_NAME"));
+                }
+            }
+        }
+
+        return tables;
+    }
+
+    // New method: retrieves tables with column details
+    public List<TableInfo> getTables() throws Exception {
+
+        List<TableInfo> tables = new ArrayList<>();
+
+        try (Connection connection = dataSource.getConnection()) {
+
+            DatabaseMetaData metaData = connection.getMetaData();
+
+            String catalog = connection.getCatalog();
+
+            try (ResultSet tableResult = metaData.getTables(
+                    catalog,
+                    null,
+                    "%",
+                    new String[]{"TABLE"})) {
+
+                while (tableResult.next()) {
+
+                    String tableName = tableResult.getString("TABLE_NAME");
+
+                    List<ColumnInfo> columns = new ArrayList<>();
+
+                    try (ResultSet columnResult = metaData.getColumns(
+                            catalog,
+                            null,
+                            tableName,
+                            "%")) {
+
+                        while (columnResult.next()) {
+
+                            String columnName =
+                                    columnResult.getString("COLUMN_NAME");
+
+                            String dataType =
+                                    columnResult.getString("TYPE_NAME");
+
+                            boolean nullable =
+                                    columnResult.getInt("NULLABLE")
+                                    == DatabaseMetaData.columnNullable;
+
+                            columns.add(new ColumnInfo(
+                                    columnName,
+                                    dataType,
+                                    nullable
+                            ));
+                        }
+                    }
+
+                    tables.add(new TableInfo(tableName, columns));
                 }
             }
         }
