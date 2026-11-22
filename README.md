@@ -56,3 +56,31 @@ To develop a reliable database migration testing platform that demonstrates safe
 
 ## 9. Project Information
 Java Development Internship Project – Infotact Solutions.
+## 10. Week 1 Test Results
+
+### Test Case 1: Multiple Tables Testing
+- Database: shadowbase_test
+- Tables: docker_test, products, test_users
+- Expected Result: API should return all tables with their column details.
+- Actual Result: All three tables and their column details were returned successfully.
+- Status: PASS
+
+### Test Case 2: Empty Database Testing
+- Database: shadowbase_empty_test
+- Expected Result: API should return an empty JSON array.
+- Actual Result: API returned an empty JSON array with HTTP 200 OK.
+- Status: PASS
+
+### Test Case 3: Invalid Schema Request
+- Endpoint: POST /api/schema/compare
+- Request Body: {}
+- Expected Result: HTTP 500 Internal Server Error.
+- Actual Result: API returned HTTP 500 Internal Server Error.
+- Status: PASS
+
+### Test Case 4: Original Database Verification
+- Database: shadowbase_test
+- Expected Result: API should read all three original tables after restoring the database configuration.
+- Actual Result: All three tables were returned successfully.
+- Status: PASS
+
