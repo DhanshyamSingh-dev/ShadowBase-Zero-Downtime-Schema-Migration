@@ -1,0 +1,38 @@
+{
+    "schemaName": "shadowbase_test",
+    "tables": [
+        {
+            "tableName": "products",
+            "columns": [
+                {
+                    "columnName": "id",
+                    "dataType": "BIGINT",
+                    "nullable": false,
+                    "length": 19,
+                    "defaultValue": null
+                },
+                {
+                    "columnName": "product_name",
+                    "dataType": "VARCHAR",
+                    "nullable": true,
+                    "length": 255,
+                    "defaultValue": null
+                },
+                {
+                    "columnName": "price",
+                    "dataType": "DECIMAL",
+                    "nullable": true,
+                    "length": 10,
+                    "defaultValue": null
+                },
+                {
+                    "columnName": "description",
+                    "dataType": "VARCHAR",
+                    "nullable": true,
+                    "length": 500,
+                    "defaultValue": null
+                }
+            ]
+        }
+    ]
+}

@@ -78,21 +78,33 @@ public class SchemaReaderService {
 
                         while (columnResult.next()) {
 
-                            String columnName =
-                                    columnResult.getString("COLUMN_NAME");
+                           
+String columnName =
+        columnResult.getString("COLUMN_NAME");
 
-                            String dataType =
-                                    columnResult.getString("TYPE_NAME");
+String dataType =
+        columnResult.getString("TYPE_NAME");
 
-                            boolean nullable =
-                                    columnResult.getInt("NULLABLE")
-                                    == DatabaseMetaData.columnNullable;
+boolean nullable =
+        columnResult.getInt("NULLABLE")
+        == DatabaseMetaData.columnNullable;
 
-                            columns.add(new ColumnInfo(
-                                    columnName,
-                                    dataType,
-                                    nullable
-                            ));
+int columnSize =
+        columnResult.getInt("COLUMN_SIZE");
+
+Integer length = columnResult.wasNull() ? null : columnSize;
+
+String defaultValue =
+        columnResult.getString("COLUMN_DEF");
+
+columns.add(new ColumnInfo(
+        columnName,
+        dataType,
+        nullable,
+        length,
+        defaultValue
+));
+
                         }
                     }
 
