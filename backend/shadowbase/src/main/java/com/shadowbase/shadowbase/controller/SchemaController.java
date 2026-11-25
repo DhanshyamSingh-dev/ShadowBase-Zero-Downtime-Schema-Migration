@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.shadowbase.shadowbase.schema.SchemaDefinition;
+import com.shadowbase.shadowbase.schema.SchemaDifference;
+import com.shadowbase.shadowbase.schema.TargetSchemaDTO;
 import com.shadowbase.shadowbase.schema.TableInfo;
 import com.shadowbase.shadowbase.service.SchemaReaderService;
 import com.shadowbase.shadowbase.service.SchemaComparisonService;
@@ -55,9 +57,9 @@ public class SchemaController {
         }
     }
 
-    // Compare current schema with target schema
-    @PostMapping("/api/schema/compare")
-    public Map<String, Object> compareSchema(
+    // Existing table-level comparison endpoint
+    @PostMapping("/api/schema/compare/tables")
+    public Map<String, Object> compareTables(
             @RequestBody SchemaDefinition schema) {
 
         try {
@@ -89,10 +91,60 @@ public class SchemaController {
 
         } catch (Exception e) {
 
+            e.printStackTrace();
+
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Schema comparison failed."
+                    "Full schema comparison failed.",
+                    e
             );
         }
     }
+
+    // New full schema comparison endpoint
+
+@PostMapping("/api/schema/compare")
+public Map<String, Object> compareFullSchema(
+        @RequestBody TargetSchemaDTO targetSchema) {
+
+    try {
+        List<TableInfo> currentSchema =
+                schemaReaderService.getTables();
+
+        List<SchemaDifference> differences =
+                comparisonService.compareSchemas(
+                        currentSchema,
+                        targetSchema
+                );
+
+        List<String> migrationPlan =
+                planService.generatePlan(
+                        differences,
+                        targetSchema
+                );
+
+        List<String> validationErrors =
+                validationService.validatePlan(migrationPlan);
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("currentSchema", currentSchema);
+        response.put("targetSchema", targetSchema);
+        response.put("differences", differences);
+        response.put("migrationPlan", migrationPlan);
+        response.put("validationErrors", validationErrors);
+
+        return response;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+
+        throw new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Full schema comparison and migration planning failed.",
+                e
+        );
+    }
+}
+
 }
