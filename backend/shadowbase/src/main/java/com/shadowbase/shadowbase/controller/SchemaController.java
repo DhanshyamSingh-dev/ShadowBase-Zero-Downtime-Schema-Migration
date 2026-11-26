@@ -146,5 +146,46 @@ public Map<String, Object> compareFullSchema(
         );
     }
 }
+@PostMapping("/api/migrations/plan")
+public Map<String, Object> generateMigrationPlan(
+        @RequestBody TargetSchemaDTO targetSchema) {
+
+    try {
+        List<TableInfo> currentSchema =
+                schemaReaderService.getTables();
+
+        List<SchemaDifference> differences =
+                comparisonService.compareSchemas(
+                        currentSchema,
+                        targetSchema
+                );
+
+        List<String> migrationPlan =
+                planService.generatePlan(
+                        differences,
+                        targetSchema
+                );
+
+        List<String> validationErrors =
+                validationService.validatePlan(migrationPlan);
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("differences", differences);
+        response.put("migrationPlan", migrationPlan);
+        response.put("validationErrors", validationErrors);
+
+        return response;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+
+        throw new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Migration plan generation failed.",
+                e
+        );
+    }
+}
 
 }
