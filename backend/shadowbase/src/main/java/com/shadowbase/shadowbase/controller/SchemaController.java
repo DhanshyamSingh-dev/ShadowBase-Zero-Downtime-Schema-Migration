@@ -16,10 +16,13 @@ import com.shadowbase.shadowbase.schema.SchemaDefinition;
 import com.shadowbase.shadowbase.schema.SchemaDifference;
 import com.shadowbase.shadowbase.schema.TargetSchemaDTO;
 import com.shadowbase.shadowbase.schema.TableInfo;
+import com.shadowbase.shadowbase.schema.MigrationExecutionResult;
+
 import com.shadowbase.shadowbase.service.SchemaReaderService;
 import com.shadowbase.shadowbase.service.SchemaComparisonService;
 import com.shadowbase.shadowbase.service.MigrationPlanService;
 import com.shadowbase.shadowbase.service.MigrationValidationService;
+import com.shadowbase.shadowbase.service.MigrationSimulationService;
 
 @RestController
 public class SchemaController {
@@ -28,20 +31,22 @@ public class SchemaController {
     private final SchemaComparisonService comparisonService;
     private final MigrationPlanService planService;
     private final MigrationValidationService validationService;
+    private final MigrationSimulationService simulationService;
 
     public SchemaController(
             SchemaReaderService schemaReaderService,
             SchemaComparisonService comparisonService,
             MigrationPlanService planService,
-            MigrationValidationService validationService) {
+            MigrationValidationService validationService,
+            MigrationSimulationService simulationService) {
 
         this.schemaReaderService = schemaReaderService;
         this.comparisonService = comparisonService;
         this.planService = planService;
         this.validationService = validationService;
+        this.simulationService = simulationService;
     }
 
-    // Get tables with column details
     @GetMapping("/api/schema/tables")
     public List<TableInfo> getTables() {
 
@@ -57,7 +62,6 @@ public class SchemaController {
         }
     }
 
-    // Existing table-level comparison endpoint
     @PostMapping("/api/schema/compare/tables")
     public Map<String, Object> compareTables(
             @RequestBody SchemaDefinition schema) {
@@ -91,8 +95,6 @@ public class SchemaController {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
-
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Full schema comparison failed.",
@@ -101,91 +103,93 @@ public class SchemaController {
         }
     }
 
-    // New full schema comparison endpoint
+    @PostMapping("/api/schema/compare")
+    public Map<String, Object> compareFullSchema(
+            @RequestBody TargetSchemaDTO targetSchema) {
 
-@PostMapping("/api/schema/compare")
-public Map<String, Object> compareFullSchema(
-        @RequestBody TargetSchemaDTO targetSchema) {
+        try {
 
-    try {
-        List<TableInfo> currentSchema =
-                schemaReaderService.getTables();
+            List<TableInfo> currentSchema =
+                    schemaReaderService.getTables();
 
-        List<SchemaDifference> differences =
-                comparisonService.compareSchemas(
-                        currentSchema,
-                        targetSchema
-                );
+            List<SchemaDifference> differences =
+                    comparisonService.compareSchemas(
+                            currentSchema, targetSchema
+                    );
 
-        List<String> migrationPlan =
-                planService.generatePlan(
-                        differences,
-                        targetSchema
-                );
+            List<String> migrationPlan =
+                    planService.generatePlan(
+                            differences, targetSchema
+                    );
 
-        List<String> validationErrors =
-                validationService.validatePlan(migrationPlan);
+            List<String> validationErrors =
+                    validationService.validatePlan(migrationPlan);
 
-        Map<String, Object> response = new HashMap<>();
+            Map<String, Object> response = new HashMap<>();
 
-        response.put("currentSchema", currentSchema);
-        response.put("targetSchema", targetSchema);
-        response.put("differences", differences);
-        response.put("migrationPlan", migrationPlan);
-        response.put("validationErrors", validationErrors);
+            response.put("currentSchema", currentSchema);
+            response.put("targetSchema", targetSchema);
+            response.put("differences", differences);
+            response.put("migrationPlan", migrationPlan);
+            response.put("validationErrors", validationErrors);
 
-        return response;
+            return response;
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        } catch (Exception e) {
 
-        throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Full schema comparison and migration planning failed.",
-                e
-        );
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Full schema comparison and migration planning failed.",
+                    e
+            );
+        }
     }
-}
-@PostMapping("/api/migrations/plan")
-public Map<String, Object> generateMigrationPlan(
-        @RequestBody TargetSchemaDTO targetSchema) {
 
-    try {
-        List<TableInfo> currentSchema =
-                schemaReaderService.getTables();
+    @PostMapping("/api/migrations/plan")
+    public Map<String, Object> generateMigrationPlan(
+            @RequestBody TargetSchemaDTO targetSchema) {
 
-        List<SchemaDifference> differences =
-                comparisonService.compareSchemas(
-                        currentSchema,
-                        targetSchema
-                );
+        try {
 
-        List<String> migrationPlan =
-                planService.generatePlan(
-                        differences,
-                        targetSchema
-                );
+            List<TableInfo> currentSchema =
+                    schemaReaderService.getTables();
 
-        List<String> validationErrors =
-                validationService.validatePlan(migrationPlan);
+            List<SchemaDifference> differences =
+                    comparisonService.compareSchemas(
+                            currentSchema, targetSchema
+                    );
 
-        Map<String, Object> response = new HashMap<>();
+            List<String> migrationPlan =
+                    planService.generatePlan(
+                            differences, targetSchema
+                    );
 
-        response.put("differences", differences);
-        response.put("migrationPlan", migrationPlan);
-        response.put("validationErrors", validationErrors);
+            List<String> validationErrors =
+                    validationService.validatePlan(migrationPlan);
 
-        return response;
+            Map<String, Object> response = new HashMap<>();
 
-    } catch (Exception e) {
-        e.printStackTrace();
+            response.put("differences", differences);
+            response.put("migrationPlan", migrationPlan);
+            response.put("validationErrors", validationErrors);
 
-        throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Migration plan generation failed.",
-                e
-        );
+            return response;
+
+        } catch (Exception e) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Migration plan generation failed.",
+                    e
+            );
+        }
     }
-}
 
+    // Run migration simulation on isolated test database
+    @PostMapping("/api/migrations/simulate")
+    public MigrationExecutionResult simulateMigration(
+            @RequestBody TargetSchemaDTO targetSchema) {
+
+        return simulationService.simulateMigration(targetSchema);
+    }
 }
